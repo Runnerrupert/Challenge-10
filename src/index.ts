@@ -89,32 +89,51 @@ const viewAllDepartments = async (): Promise<void> => {
 
 // Create an addEmployee method - This Method adds an employee to the employees table
 const addEmployee = async (): Promise<void> => {
-    
+    // Destructures and stores the objects returned by pool.query in a variable
+    const { rows: roleRows } = await pool.query(`SELECT id, title FROM roles`);
+    const { rows: managerRows } = await pool.query(`SELECT id, first_name, last_name FROM employees WHERE manager_id IS NULL`);
+    // Stores an array of objects built using the .map() method - Each object has a "value" and a "name"
+    const roleList = roleRows.map((role: any) => ({value: role.id, name: role.title}));
+    const managerList = managerRows.map((manager: any) => ({value: manager.id, name: `${manager.first_name} ${manager.last_name}`}));
+    // An array that holds information in objects for each question
+    const questions = [
+        {name: 'employeeFirstName', type: 'input', message: `What is the employee's first name?`}, 
+        {name: 'employeeLastName', type: 'input', message: `What is the employee's last name?`}, 
+        {name: 'employeeRole', type: 'list', message: `What is the employee's role?`, choices: roleList}, 
+        {name: 'employeeManager', type: 'list', message: `Who is the employee's manager?`, choices: managerList}];
+    // A variable to hold all responses (answers) from the inquirer prompts
+    const answers = await inquirer.prompt(questions);
+    // Adds the role that was created by the user from answering the prompt questions
+    const sql = `INSERT INTO employees (first_name, last_name, role_id, manager_id) VALUES ($1, $2, $3, $4)`;
+    // Initializes the sql code with the data given by the user
+    await pool.query(sql, [answers.employeeFirstName, answers.employeeLastName, answers.employeeRole, answers.employeeManager]);
+    // Statement to tell the user that their role has been added
+    console.log(`Added ${answers.employeeFirstName} ${answers.employeeLastName} to the database`);
+    // Retrieves the new information from the departments table and logs it to the console formatted as a table
+    const newTable = await pool.query(`SELECT * FROM employees`);
+    console.table(newTable.rows);
+    // Re-initializes the init function so the user can make another choice
+    init();
 }
     
 // Create an addRole method - This Method adds a Role to the roles table
 const addRole = async (): Promise<void> => {
-    // Destructures and stores the objects returned by pool.query in a variable
     const { rows } = await pool.query(`SELECT id, name FROM departments`);
-    // Stores an array of objects built using the .map() method - Each object has a "value" and a "name"
     const departmentList = rows.map((department: any) => ({value: department.id, name: department.name}));
-    // An array that holds information in objects for each question
+    
     const questions = [
         {name: 'roleName', type: 'input', message: 'What is the name of the role?'}, 
         {name: 'roleSalary', type: 'input', message: 'What is the salary of the role?'}, 
         {name: 'departmentName', type: 'list', message: 'Which department does the role belong to?', choices: departmentList}];
-    // A variable to hold all responses (answers) from the inquirer prompts
     const answers = await inquirer.prompt(questions);
-    // Adds the role that was created by the user from answering the prompt questions
+    
     const sql = `INSERT INTO roles (title, salary, department_id) VALUES ($1, $2, $3)`;
-    // Initializes the sql code with the data given by the user
     await pool.query(sql, [answers.roleName, answers.roleSalary, answers.departmentName]);
-    // Statement to tell the user that their role has been added
+    
     console.log(`Added ${answers.roleName} to the database`);
-    // Retrieves the new information from the departments table and logs it to the console formatted as a table
+    
     const newTable = await pool.query(`SELECT * FROM roles`);
     console.table(newTable.rows);
-    // Re-initializes the init function so the user can make another choice
     init();
 }
     
@@ -135,6 +154,16 @@ async function addDepartment() {
 
 // Create an updateEmployeeRole method - This Method updates an existing employee on the employees table
 const updateEmployeeRole = async (): Promise<void> => {
+    
+}
+
+// Create a deleteEmployee method - This method deletes an employee from the employee table
+async function deleteEmployee() {
+
+}
+
+// Create a deleteRole method - This method deletes a role from the employee table
+async function deleteRole() {
     
 }
 
