@@ -1,85 +1,78 @@
-// import inquirer from 'inquirer';
+import inquirer from 'inquirer';
 import { pool, connectToDb } from './connection.js';
 import { QueryResult } from 'pg';
 
-// Create a Cli Class
-
 await connectToDb();
 
-pool.query('SELECT * FROM employees', (err: Error, result: QueryResult) => {
-    if (err) {
-        console.log(err);
-    } else if (result) {
-        console.log(result.rows);
+class Cli {
+    exit: boolean = false;
+
+    init = async (): Promise<void> => {
+        await inquirer
+            .prompt(
+                {   
+                    name: 'actions',
+                    type: 'list',
+                    message: 'What would you like to do?',
+                    choices: ['View All Employees', 'Add Employee', 'Update Employee Role', 'View All Roles', 'Add Role', 'View All Departments', 'Add Department', 'Quit']
+                }
+            ) .then ((answers) => {
+                if (answers.actions === 'View All Employees') {
+                    this.viewAllEmployees().then(() => this.init());
+                } else if (answers.actions === 'Add Employee') {
+                    this.addEmployee().then(() => this.init());
+                } else if (answers.actions === 'Update Employee Role') {
+                    this.updateEmployeeRole().then(() => this.init());
+                } else if (answers.actions === 'View All Roles') {
+                    this.viewAllRoles().then(() => this.init());
+                } else if (answers.actions === 'Add Role') {
+                    this.addRole().then(() => this.init());
+                } else if (answers.actions === 'View All Departments') {
+                    this.viewAllDepartments().then(() => this.init());
+                } else if (answers.actions === 'Add Department') {
+                    this.addDepartment().then(() => this.init());
+                } else if (answers.actions === 'Quit') {
+                    process.exit(0);
+                }
+            }) 
     }
-});
+    
+    // Create a viewAllEmployees method
+    viewAllEmployees = async (): Promise<void> => {
+        
+    }
+    
+    // Create an addEmployee method
+    addEmployee = async (): Promise<void> => {
+        
+    }
+    
+    // Create an updateEmployeeRole method
+    updateEmployeeRole = async (): Promise<void> => {
+    
+    }
+    
+    // Create a viewAllRoles method
+    viewAllRoles = async (): Promise<void> => {
+    
+    }
+    
+    // Create an addRole method
+    addRole = async (): Promise<void> => {
+        
+    }
+    
+    // Create a viewAllDepartments method
+    viewAllDepartments = async (): Promise<void> => {
 
-// class CLI {
+    }
+    
+    // Create an addDepartment method
+    addDepartment = async (): Promise<void> => {
+    
+    }
+}
 
-//     // departments = 
-//     // roles = 
-//     // employees = 
+const cli = new Cli();
 
-//     // Create an addEmployee method
-//     addEmployee() {
-//         inquirer
-//             .prompt([
-//                 {
-//                     type: 'input',
-//                     name: 'firstName',
-//                     message: 'What is their First Name?',
-//                 },
-//                 {
-//                     type: 'input',
-//                     name: 'lastName',
-//                     message: 'What is their Last Name?',
-//                 },
-//                 {
-
-//                 }
-//             ])
-//     }
-
-//     // Create an updateEmployeeRole method
-//     updateEmployeeRole() {
-
-//     }
-
-//     // Create a viewAllRoles method
-//     viewAllRoles() {
-
-//     }
-
-//     // Create an addRole method
-//     addRole() {
-//         inquirer
-//             .prompt([
-//                 {
-//                     type: 'input',
-//                     name: 'roleName',
-//                     message: 'What is the name of the role?',
-//                 },
-//                 {
-//                     type: 'input',
-//                     name: 'roleSalary',
-//                     message: 'What is the salary of the role?',
-//                 },
-//                 {
-//                     type: 'rawlist',
-//                     name: 'departments',
-//                     message: 'Which department does the role belong to?',
-//                     choices: [departments],
-//                 }
-//             ])
-//     }
-
-//     // Create a viewAllDepartments method
-//     viewAllDepartments() {
-
-//     }
-
-//     // Create an addDepartment method
-//     addDepartment() {
-
-//     }
-// }
+cli.init();
