@@ -1,78 +1,87 @@
 import inquirer from 'inquirer';
 import { pool, connectToDb } from './connection.js';
 import { QueryResult } from 'pg';
+import chalk from 'chalk';
 
 await connectToDb();
 
-class Cli {
-    exit: boolean = false;
+async function init() {
+    const answers = await inquirer.prompt({
+        name: 'actions',
+        type: 'list',
+        message: 'What would you like to do?',
+        choices: [
+                'View All Employees',
+                'Add Employee',
+                'Update Employee Role',
+                'View All Roles',
+                'Add Role',
+                'View All Departments',
+                'Add Department',
+                'Quit'
+        ]
+    });
 
-    init = async (): Promise<void> => {
-        await inquirer
-            .prompt(
-                {   
-                    name: 'actions',
-                    type: 'list',
-                    message: 'What would you like to do?',
-                    choices: ['View All Employees', 'Add Employee', 'Update Employee Role', 'View All Roles', 'Add Role', 'View All Departments', 'Add Department', 'Quit']
-                }
-            ) .then ((answers) => {
-                if (answers.actions === 'View All Employees') {
-                    this.viewAllEmployees().then(() => this.init());
-                } else if (answers.actions === 'Add Employee') {
-                    this.addEmployee().then(() => this.init());
-                } else if (answers.actions === 'Update Employee Role') {
-                    this.updateEmployeeRole().then(() => this.init());
-                } else if (answers.actions === 'View All Roles') {
-                    this.viewAllRoles().then(() => this.init());
-                } else if (answers.actions === 'Add Role') {
-                    this.addRole().then(() => this.init());
-                } else if (answers.actions === 'View All Departments') {
-                    this.viewAllDepartments().then(() => this.init());
-                } else if (answers.actions === 'Add Department') {
-                    this.addDepartment().then(() => this.init());
-                } else if (answers.actions === 'Quit') {
-                    process.exit(0);
-                }
-            }) 
-    }
-    
-    // Create a viewAllEmployees method
-    viewAllEmployees = async (): Promise<void> => {
-        
-    }
-    
-    // Create an addEmployee method
-    addEmployee = async (): Promise<void> => {
-        
-    }
-    
-    // Create an updateEmployeeRole method
-    updateEmployeeRole = async (): Promise<void> => {
-    
-    }
-    
-    // Create a viewAllRoles method
-    viewAllRoles = async (): Promise<void> => {
-    
-    }
-    
-    // Create an addRole method
-    addRole = async (): Promise<void> => {
-        
-    }
-    
-    // Create a viewAllDepartments method
-    viewAllDepartments = async (): Promise<void> => {
-
-    }
-    
-    // Create an addDepartment method
-    addDepartment = async (): Promise<void> => {
-    
+    switch (answers.actions) {
+        case 'View All Employees':
+            viewAllEmployees();
+            break;
+        case 'Add Employee':
+            addEmployee();
+            break;
+        case 'Update Employee Role':
+            updateEmployeeRole();
+            break;
+        case 'View All Roles':
+            viewAllRoles();
+            break;
+        case 'Add Role':
+            addRole();
+            break;
+        case 'View All Departments':
+            viewAllDepartments();
+            break;
+        case 'Add Department':
+            addDepartment();
+            break;
+        case 'Quit':
+            process.exit(0);
     }
 }
+    
+    // Create a viewAllEmployees method
+const viewAllEmployees = async (): Promise<void> => {
+    init();
+}    
 
-const cli = new Cli();
+    // Create an addEmployee method
+const addEmployee = async (): Promise<void> => {
+    init();
+}
+    
+    // Create an updateEmployeeRole method
+const updateEmployeeRole = async (): Promise<void> => {
+    init();
+}
+    
+    // Create a viewAllRoles method
+const viewAllRoles = async (): Promise<void> => {
+    init();
+}
+    
+    // Create an addRole method
+const addRole = async (): Promise<void> => {
+    init();
+}
+    
+    // Create a viewAllDepartments method
+const viewAllDepartments = async (): Promise<void> => {
+    init();
+}
+    
+    // Create an addDepartment method
+const addDepartment = async (): Promise<void> => {
+    init();
+}
 
-cli.init();
+init();
