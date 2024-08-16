@@ -54,7 +54,22 @@ async function init() {
 }
 // Create a viewAllEmployees method - This Method logs a table of all employee specific data
 const viewAllEmployees = async () => {
-    const sql = `SELECT * FROM employees`;
+    const sql = `SELECT 
+                    employees.id, 
+                    employees.first_name, 
+                    employees.last_name, 
+                    roles.title,
+                    departments.name AS department, 
+                    roles.salary,
+                    CONCAT(manager.first_name, ' ', manager.last_name) AS manager  
+                FROM 
+                    employees
+                LEFT JOIN 
+                    roles ON employees.role_id = roles.id
+                LEFT JOIN 
+                    employees manager ON employees.manager_id = manager.id
+                LEFT JOIN
+                    departments ON roles.department_id = departments.id`;
     // A variable for holding the objects retrieved by the sql code
     const res = await pool.query(sql);
     // Uses the "Chalk" package to create different colored text within the Command-Line Interface
@@ -66,7 +81,7 @@ const viewAllEmployees = async () => {
 };
 // Create a viewAllRoles method - This Method logs a table of all roles specific data - Refer to viewAllEmployees
 const viewAllRoles = async () => {
-    const sql = `SELECT * FROM roles`;
+    const sql = `SELECT roles.id, roles.title, departments.name AS department, roles.salary FROM roles JOIN departments ON roles.department_id = departments.id`;
     const res = await pool.query(sql);
     console.log(chalk.whiteBright('Roles:'));
     console.table(res.rows);
@@ -103,9 +118,6 @@ const addEmployee = async () => {
     await pool.query(sql, [answers.employeeFirstName, answers.employeeLastName, answers.employeeRole, answers.employeeManager]);
     // Statement to tell the user that their role has been added
     console.log(`Added ${answers.employeeFirstName} ${answers.employeeLastName} to the database`);
-    // Retrieves the new information from the departments table and logs it to the console formatted as a table
-    const newTable = await pool.query(`SELECT * FROM employees`);
-    console.table(newTable.rows);
     // Re-initializes the init function so the user can make another choice
     init();
 };
@@ -122,8 +134,6 @@ const addRole = async () => {
     const sql = `INSERT INTO roles (title, salary, department_id) VALUES ($1, $2, $3)`;
     await pool.query(sql, [answers.roleName, answers.roleSalary, answers.departmentName]);
     console.log(`Added ${answers.roleName} to the database`);
-    const newTable = await pool.query(`SELECT * FROM roles`);
-    console.table(newTable.rows);
     init();
 };
 // Create an addDepartment method - This Method adds a department to the departments table - Refer to addRole
@@ -133,19 +143,29 @@ async function addDepartment() {
     const sql = `INSERT INTO departments (name) VALUES ($1)`;
     await pool.query(sql, [answer.departmentName]);
     console.log(`Added ${answer.departmentName} to the database`);
-    const newTable = await pool.query(`SELECT * FROM departments`);
-    console.table(newTable.rows);
     init();
 }
 // Create an updateEmployeeRole method - This Method updates an existing employee on the employees table
 const updateEmployeeRole = async () => {
+    const { rows: employeeRows } = await pool.query(`SELECT id, first_name, last_name FROM employees`);
+    const { rows: roleRows } = await pool.query(`SELECT id, title FROM roles`);
+    const employeeList = employeeRows.map((employee) => ({ value: employee.id, name: `${employee.first_name} ${employee.last_name}` }));
+    const roleList = roleRows.map((role) => ({ value: role.id, name: role.title }));
+    const questions = [
+        { name: 'employeeName', type: 'list', message: `Which employee's role do you want to update?`, choices: employeeList },
+        { name: 'employeeRole', type: 'list', message: 'Which role do you want to assign the selected employee?', choices: roleList }
+    ];
+    const answers = await inquirer.prompt(questions);
+    const selectedEmployee = employeeList.find(employee => employee.value === answers.employeeName)?.name;
+    const sql = `UPDATE employees SET role_id = $2 WHERE id = $1`;
+    await pool.query(sql, [answers.employeeName, answers.employeeRole]);
+    console.log(`Updated ${selectedEmployee}'s role'`);
+    init();
 };
 // Create a deleteEmployee method - This method deletes an employee from the employee table
-async function deleteEmployee() {
-}
-// Create a deleteRole method - This method deletes a role from the employee table
-async function deleteRole() {
-}
+// async function deleteEmployee() {}
+// // Create a deleteRole method - This method deletes a role from the employee table
+// async function deleteRole() {}
 // Create a deleteDepartment method - This method deletes a department from the departments table
 async function deleteDepartment() {
     const { rows } = await pool.query(`SELECT id, name FROM departments`);
@@ -156,8 +176,6 @@ async function deleteDepartment() {
     const sql = `DELETE FROM departments WHERE id = $1`;
     await pool.query(sql, [answer.departmentName]);
     console.log(`Deleted ${deletedDepartment} from the database`);
-    const newTable = await pool.query(`SELECT * FROM departments`);
-    console.table(newTable.rows);
     init();
 }
 init();
